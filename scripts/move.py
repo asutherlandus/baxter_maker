@@ -36,6 +36,8 @@ import sys
 
 import rospy
 
+import baxter_interface
+
 from geometry_msgs.msg import (
     PoseStamped,
     Pose,
@@ -60,28 +62,17 @@ def ik_test(limb, point, orient):
         'left': PoseStamped(
             header=hdr,
             pose=Pose(
-                position=point
-                ),
+                position=point,
                 orientation=orient
                 ),
             ),
-        ),
         'right': PoseStamped(
             header=hdr,
             pose=Pose(
-                position=Point(
-                    x=0.656982770038,
-                    y=-0.852598021641,
-                    z=0.0388609422173,
-                ),
-                orientation=Quaternion(
-                    x=0.367048116303,
-                    y=0.885911751787,
-                    z=-0.108908281936,
-                    w=0.261868353356,
+                position=point,
+                orientation=orient
                 ),
             ),
-        ),
     }
 
     ikreq.pose_stamp.append(poses[limb])
@@ -112,7 +103,7 @@ def ik_test(limb, point, orient):
         # Set arm position
         arm = baxter_interface.Limb(limb)
         while not rospy.is_shutdown():
-            arm.set_positions(limb_joints)
+            arm.set_joint_positions(limb_joints)
             rospy.sleep(0.01)
     else:
         print("INVALID POSE - No Valid Joint Solution Found.")
@@ -142,13 +133,13 @@ def main():
         help="the limb to test"
     )
     args = parser.parse_args(rospy.myargv()[1:2])
-    point = Point(x = rospy.myargv()[2],
-                  y = rospy.myargv()[3],
-                  z = rospy.myargv()[4])
-    orient = Quaternion(x = rospy.myargv()[5],
-                        y = rospy.myargv()[6],
-                        z = rospy.myargv()[7],
-                        w = rospy.myargv()[8])
+    point = Point(x = float(rospy.myargv()[2]),
+                  y = float(rospy.myargv()[3]),
+                  z = float(rospy.myargv()[4]))
+    orient = Quaternion(x = float(rospy.myargv()[5]),
+                        y = float(rospy.myargv()[6]),
+                        z = float(rospy.myargv()[7]),
+                        w = float(rospy.myargv()[8]))
     print "Point: ", point
     print "Orientation: ", orient
     return ik_test(args.limb, point, orient)
